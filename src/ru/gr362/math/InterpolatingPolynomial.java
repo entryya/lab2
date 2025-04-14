@@ -83,8 +83,10 @@ public class InterpolatingPolynomial extends Polynomial implements Function {
     }
 
     public void deletePoint(double x, double y) {
-        points.remove(x, y);
-        create();
+        if (points.containsKey(x)) {
+            points.remove(x, y);
+            create();
+        }
     }
 
     @Override

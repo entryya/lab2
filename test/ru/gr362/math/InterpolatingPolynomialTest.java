@@ -63,6 +63,7 @@ class InterpolatingPolynomialTest {
         p2.addPoint(0.0, 0.0);
         assertNotEquals(p1, p2);
 
+        p2.deletePoint(5.0, 0.0);
         p2.deletePoint(0.0, 0.0);
         assertNotEquals(p1, p2);
     }

@@ -9,6 +9,7 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Map;
 
 public class MainWindow extends JFrame {
     private static final int MIN_SZ = GroupLayout.PREFERRED_SIZE;
@@ -19,7 +20,7 @@ public class MainWindow extends JFrame {
     private final PointsPainter pointsPainter = new PointsPainter();
     private FunctionPainter functionPainter = new FunctionPainter();
 
-    private InterpolatingPolynomial interpolatingPolynomial = new InterpolatingPolynomial();
+    private InterpolatingPolynomial interpolatingPolynomial;
 
     private JPanel mainPanel;
     private JPanel controlPanel;
@@ -188,7 +189,7 @@ public class MainWindow extends JFrame {
                     pointsPainter.paint(g);
                 }
 
-                if (cbPolynomial.isSelected() ) {
+                if (cbPolynomial.isSelected()) {
                     functionPainter.setConverter(converter);
                     functionPainter.setFunction(interpolatingPolynomial);
                     functionPainter.setColor(pPolynomial.getBackground());
@@ -215,10 +216,14 @@ public class MainWindow extends JFrame {
 
                 if (SwingUtilities.isLeftMouseButton(e)) {
                     pointsPainter.addPoint(x, y);
-                    interpolatingPolynomial.addPoint(x, y);
+                    if (interpolatingPolynomial == null)
+                        interpolatingPolynomial = new InterpolatingPolynomial(Map.of(x, y));
+                    else interpolatingPolynomial.addPoint(x, y);
                 } else if (SwingUtilities.isRightMouseButton(e)) {
-                    pointsPainter.deletePoint(x, y);
-                    interpolatingPolynomial.deletePoint(x, y);
+                    if (!pointsPainter.getPoints().isEmpty()) {
+                        pointsPainter.deletePoint(x, y);
+                        interpolatingPolynomial.deletePoint(x, y);
+                    }
                 }
                 mainPanel.repaint();
             }
@@ -277,15 +282,11 @@ public class MainWindow extends JFrame {
         cbPolynomial = new JCheckBox("Показывать полином", true);
         cbDerivative = new JCheckBox("Показывать производную", false);
 
-        cbPolynomial.addActionListener(e -> {
-            if (cbPolynomial.isSelected()) {
-                functionPainter.setFunction(interpolatingPolynomial);
-
-                /*for (var entry : pointsPainter.getPoints().entrySet()) {
-                    interpolatingPolynomial.addPoint(entry.getKey(), entry.getValue());*/
-                //}
+        cbPolynomial.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                mainPanel.repaint();
             }
-            mainPanel.repaint();
         });
 
         pPoints = new JPanel();

@@ -19,7 +19,7 @@ public class CartesianPainter implements Painter {
         g.drawLine(0, xAxis, width, xAxis);
         g.drawLine(yAxis, 0, yAxis, height);
 
-        g.setFont(new Font("Cambria", Font.BOLD, 12));
+        g.setFont(new Font("Cambria", Font.BOLD, 10));
         g.setColor(Color.RED);
         FontMetrics m = g.getFontMetrics();
         for (int i = (int)Math.ceil(converter.getxMin()); i <= converter.getxMax(); i++) {
@@ -29,7 +29,7 @@ public class CartesianPainter implements Painter {
             String label = Double.toString(i);
             int labelWidth = m.stringWidth(label);
 
-            int labelX = (i == 0) ? x + 5 : x - labelWidth / 2;
+            int labelX = (i == 0) ? x + 4 : x - labelWidth / 2;
 
             g.drawString(label, labelX, xAxis + 20);
         }
