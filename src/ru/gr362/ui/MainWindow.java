@@ -185,13 +185,11 @@ public class MainWindow extends JFrame {
 
                 if (cbPoints.isSelected()) {
                     pointsPainter.setConverter(converter);
-                    pointsPainter.setColor(pPoints.getBackground());
                     pointsPainter.paint(g);
                 }
 
                 if (cbPolynomial.isSelected()) {
                     functionPainter.setConverter(converter);
-                    functionPainter.setColor(pPolynomial.getBackground());
                     functionPainter.paint(g);
                 }
             }
@@ -290,7 +288,6 @@ public class MainWindow extends JFrame {
                 }
                 functionPainter.setFunction(interpolatingPolynomial);
             } else {
-                functionPainter.setFunction(null);
             }
             mainPanel.repaint();
         });
@@ -308,7 +305,6 @@ public class MainWindow extends JFrame {
                 Color newColor = JColorChooser.showDialog(MainWindow.this, "Цвет точек", pPoints.getBackground());
                 if (newColor != null) {
                     pPoints.setBackground(newColor);
-                    mainPanel.repaint();
                 }
             }
         });
@@ -319,7 +315,6 @@ public class MainWindow extends JFrame {
                 Color newColor = JColorChooser.showDialog(MainWindow.this, "Цвет графика полинома", pPolynomial.getBackground());
                 if (newColor != null) {
                     pPolynomial.setBackground(newColor);
-                    mainPanel.repaint();
                 }
             }
         });
@@ -330,7 +325,6 @@ public class MainWindow extends JFrame {
                 Color newColor = JColorChooser.showDialog(MainWindow.this, "Цвет графика производной", pDerivative.getBackground());
                 if (newColor != null) {
                     pDerivative.setBackground(newColor);
-                    mainPanel.repaint();
                 }
             }
         });
