@@ -185,11 +185,14 @@ public class MainWindow extends JFrame {
 
                 if (cbPoints.isSelected()) {
                     pointsPainter.setConverter(converter);
+                    pointsPainter.setColor(pPoints.getBackground());
                     pointsPainter.paint(g);
                 }
 
                 if (cbPolynomial.isSelected()) {
                     functionPainter.setConverter(converter);
+                    functionPainter.setFunction(interpolatingPolynomial);
+                    functionPainter.setColor(pPolynomial.getBackground());
                     functionPainter.paint(g);
                 }
             }
@@ -206,12 +209,6 @@ public class MainWindow extends JFrame {
         mainPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-
-                /*var g = mainPanel.getGraphics();
-                g.setColor(Color.GREEN);
-                var sz = 12;
-                g.fillOval(clickPoint.x - sz / 2, clickPoint.y - sz / 2, sz, sz);
-            */
                 var clickPoint = e.getPoint();
 
                 double x = converter.xScr2Crt(clickPoint.x);
@@ -286,7 +283,6 @@ public class MainWindow extends JFrame {
                 for (var entry : pointsPainter.getPoints().entrySet()) {
                     interpolatingPolynomial.addPoint(entry.getKey(), entry.getValue());
                 }
-                functionPainter.setFunction(interpolatingPolynomial);
             } else {
             }
             mainPanel.repaint();
@@ -305,6 +301,7 @@ public class MainWindow extends JFrame {
                 Color newColor = JColorChooser.showDialog(MainWindow.this, "Цвет точек", pPoints.getBackground());
                 if (newColor != null) {
                     pPoints.setBackground(newColor);
+                    mainPanel.repaint();
                 }
             }
         });
@@ -315,6 +312,7 @@ public class MainWindow extends JFrame {
                 Color newColor = JColorChooser.showDialog(MainWindow.this, "Цвет графика полинома", pPolynomial.getBackground());
                 if (newColor != null) {
                     pPolynomial.setBackground(newColor);
+                    mainPanel.repaint();
                 }
             }
         });
@@ -325,6 +323,7 @@ public class MainWindow extends JFrame {
                 Color newColor = JColorChooser.showDialog(MainWindow.this, "Цвет графика производной", pDerivative.getBackground());
                 if (newColor != null) {
                     pDerivative.setBackground(newColor);
+                    mainPanel.repaint();
                 }
             }
         });
