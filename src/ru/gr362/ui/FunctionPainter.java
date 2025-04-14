@@ -6,7 +6,7 @@ import java.awt.*;
 public class FunctionPainter implements Painter {
     private Function function;
     private Converter converter;
-    private Color color = Color.decode("#006400");
+    private Color color;
 
     private int width;
     private int height;

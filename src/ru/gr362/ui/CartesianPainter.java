@@ -16,27 +16,34 @@ public class CartesianPainter implements Painter {
         int xAxis = converter.yCrt2Scr(0);
         int yAxis = converter.xCrt2Scr(0);
 
-        g.drawLine(0, xAxis, width, xAxis); // ось X
-        g.drawLine(yAxis, 0, yAxis, height); // ось Y
+        g.drawLine(0, xAxis, width, xAxis);
+        g.drawLine(yAxis, 0, yAxis, height);
 
-        g.setFont(new Font("Cambria", Font.PLAIN, 12));
+        g.setFont(new Font("Cambria", Font.BOLD, 12));
         g.setColor(Color.RED);
         FontMetrics m = g.getFontMetrics();
         for (int i = (int)Math.ceil(converter.getxMin()); i <= converter.getxMax(); i++) {
             int x = converter.xCrt2Scr(i);
-            g.drawLine(x, xAxis - 5, x, xAxis + 5); // деление
-            String label = Integer.toString(i);
+            g.drawLine(x, xAxis - 5, x, xAxis + 5);
+
+            String label = Double.toString(i);
             int labelWidth = m.stringWidth(label);
-            g.drawString(label, x - labelWidth / 2, xAxis + 20);
+
+            int labelX = (i == 0) ? x + 5 : x - labelWidth / 2;
+
+            g.drawString(label, labelX, xAxis + 20);
         }
 
-        // Метки по Y
         for (int i = (int)Math.ceil(converter.getyMin()); i <= converter.getyMax(); i++) {
-            int y = converter.yCrt2Scr(i);
-            g.drawLine(yAxis - 5, y, yAxis + 5, y); // деление
-            String label = Integer.toString(i);
-            int labelHeight = m.getHeight();
-            g.drawString(label, yAxis + 8, y + labelHeight / 2 - 4);
+            if (i != 0) {
+                int y = converter.yCrt2Scr(i);
+                g.drawLine(yAxis - 5, y, yAxis + 5, y);
+
+                String label = Double.toString(i);
+                int labelHeight = m.getHeight();
+
+                g.drawString(label, yAxis + 8, y + labelHeight / 2 - 4);
+            }
         }
 
         /*

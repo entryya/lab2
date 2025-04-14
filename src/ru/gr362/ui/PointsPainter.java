@@ -8,7 +8,7 @@ import java.util.LinkedHashMap;
 public class PointsPainter implements Painter{
     private LinkedHashMap<Double, Double> points = new LinkedHashMap<>();
     private Converter converter;
-    private Color color = Color.decode("#8B0000");
+    private Color color;
 
     private int width;
     private int height;

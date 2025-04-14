@@ -2,7 +2,6 @@ package ru.gr362.ui;
 
 import ru.gr362.math.InterpolatingPolynomial;
 import ru.gr362.converting.Converter;
-import ru.gr362.math.Polynomial;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -18,9 +17,9 @@ public class MainWindow extends JFrame {
     private Converter converter;
     private final CartesianPainter cp = new CartesianPainter();
     private final PointsPainter pointsPainter = new PointsPainter();
-    FunctionPainter functionPainter = new FunctionPainter();
+    private FunctionPainter functionPainter = new FunctionPainter();
 
-    InterpolatingPolynomial interpolatingPolynomial = new InterpolatingPolynomial();
+    private InterpolatingPolynomial interpolatingPolynomial = new InterpolatingPolynomial();
 
     private JPanel mainPanel;
     private JPanel controlPanel;
@@ -189,7 +188,7 @@ public class MainWindow extends JFrame {
                     pointsPainter.paint(g);
                 }
 
-                if (cbPolynomial.isSelected()) {
+                if (cbPolynomial.isSelected() ) {
                     functionPainter.setConverter(converter);
                     functionPainter.setFunction(interpolatingPolynomial);
                     functionPainter.setColor(pPolynomial.getBackground());
@@ -280,18 +279,19 @@ public class MainWindow extends JFrame {
 
         cbPolynomial.addActionListener(e -> {
             if (cbPolynomial.isSelected()) {
-                for (var entry : pointsPainter.getPoints().entrySet()) {
-                    interpolatingPolynomial.addPoint(entry.getKey(), entry.getValue());
-                }
-            } else {
+                functionPainter.setFunction(interpolatingPolynomial);
+
+                /*for (var entry : pointsPainter.getPoints().entrySet()) {
+                    interpolatingPolynomial.addPoint(entry.getKey(), entry.getValue());*/
+                //}
             }
             mainPanel.repaint();
         });
 
         pPoints = new JPanel();
-        pPoints.setBackground(Color.decode("#8B0000"));
+        pPoints.setBackground(Color.decode("#FF7F50"));
         pPolynomial = new JPanel();
-        pPolynomial.setBackground(Color.decode("#006400"));
+        pPolynomial.setBackground(Color.decode("#1E90FF"));
         pDerivative = new JPanel();
         pDerivative.setBackground(Color.decode("#483D8B"));
 
