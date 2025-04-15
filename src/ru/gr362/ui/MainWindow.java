@@ -1,5 +1,6 @@
 package ru.gr362.ui;
 
+import ru.gr362.math.Derivative;
 import ru.gr362.math.InterpolatingPolynomial;
 import ru.gr362.converting.Converter;
 
@@ -21,6 +22,7 @@ public class MainWindow extends JFrame {
     private FunctionPainter functionPainter = new FunctionPainter();
 
     private InterpolatingPolynomial interpolatingPolynomial;
+    private Derivative derivative;
 
     private JPanel mainPanel;
     private JPanel controlPanel;
@@ -195,16 +197,17 @@ public class MainWindow extends JFrame {
                     functionPainter.setColor(pPolynomial.getBackground());
                     functionPainter.paint(g);
                 }
+
+                if (cbDerivative.isSelected()) {
+                    derivative = new Derivative(interpolatingPolynomial);
+                    functionPainter.setConverter(converter);
+                    functionPainter.setFunction(derivative);
+                    functionPainter.setColor(pDerivative.getBackground());
+                    functionPainter.paint(g);
+                }
             }
         };
         mainPanel.setBackground(Color.WHITE);
-        /*В лабораторной работе использовать специальный класс
-                PointsPainter, в котором хранить ДЕКАРТОВЫЕ координаты
-                точек, указанных пользователем.
-                В классе должен быть реализован метод paint(Graphics g),
-                из интерфейса Painter, с помощью которых коллекция
-                точек будет отображаться на экране.
-                Вызов метода paint осуществлять при перерисовке панели.*/
 
         mainPanel.addMouseListener(new MouseAdapter() {
             @Override
@@ -216,9 +219,9 @@ public class MainWindow extends JFrame {
 
                 if (SwingUtilities.isLeftMouseButton(e)) {
                     pointsPainter.addPoint(x, y);
-                    if (interpolatingPolynomial == null)
+                    if (interpolatingPolynomial == null) {
                         interpolatingPolynomial = new InterpolatingPolynomial(Map.of(x, y));
-                    else interpolatingPolynomial.addPoint(x, y);
+                    } else interpolatingPolynomial.addPoint(x, y);
                 } else if (SwingUtilities.isRightMouseButton(e)) {
                     if (!pointsPainter.getPoints().isEmpty()) {
                         pointsPainter.deletePoint(x, y);
@@ -228,6 +231,7 @@ public class MainWindow extends JFrame {
                 mainPanel.repaint();
             }
         });
+
         controlPanel = new JPanel();
         controlPanel.setBorder(
                 new TitledBorder(
@@ -235,6 +239,7 @@ public class MainWindow extends JFrame {
                         "Настройки"
                 )
         );
+
         lblXMin = new JLabel();
         lblXMax = new JLabel();
         lblYMin = new JLabel();
@@ -282,21 +287,61 @@ public class MainWindow extends JFrame {
         cbPolynomial = new JCheckBox("Показывать полином", true);
         cbDerivative = new JCheckBox("Показывать производную", false);
 
-        cbPolynomial.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                mainPanel.repaint();
-            }
-        });
+        cbPoints.addMouseListener(repaintOnClick);
+        cbPolynomial.addMouseListener(repaintOnClick);
+        cbDerivative.addMouseListener(repaintOnClick);
 
         pPoints = new JPanel();
         pPoints.setBackground(Color.decode("#FF7F50"));
         pPolynomial = new JPanel();
         pPolynomial.setBackground(Color.decode("#1E90FF"));
         pDerivative = new JPanel();
-        pDerivative.setBackground(Color.decode("#483D8B"));
+        pDerivative.setBackground(Color.decode("#90EE90"));
 
-        pPoints.addMouseListener(new MouseAdapter() {
+
+        addColorChooser(pPoints, "Цвет точек");
+        addColorChooser(pPolynomial, "Цвет графика полинома");
+        addColorChooser(pDerivative, "Цвет графика производной");
+
+        /*cbPoints.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                mainPanel.repaint();
+            }
+        });
+
+        cbPolynomial.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                mainPanel.repaint();
+            }
+        });*/
+    }
+
+    private MouseAdapter repaintOnClick = new MouseAdapter() {
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            mainPanel.repaint();
+        }
+    };
+
+    private void addColorChooser(JPanel panel, String title) {
+        panel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                Color newColor = JColorChooser.showDialog(MainWindow.this, title, panel.getBackground());
+                if (newColor != null) {
+                    panel.setBackground(newColor);
+                    mainPanel.repaint();
+                }
+            }
+        });
+    }
+}
+
+
+
+/*pPoints.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 Color newColor = JColorChooser.showDialog(MainWindow.this, "Цвет точек", pPoints.getBackground());
@@ -327,6 +372,4 @@ public class MainWindow extends JFrame {
                     mainPanel.repaint();
                 }
             }
-        });
-    }
-}
+        });*/

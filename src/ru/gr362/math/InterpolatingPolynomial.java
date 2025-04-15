@@ -4,7 +4,7 @@ import ru.gr362.ui.Function;
 
 import java.util.*;
 
-public class InterpolatingPolynomial extends Polynomial implements Function {
+public class InterpolatingPolynomial extends Polynomial implements Function{
     private LinkedHashMap<Double, Double> points;
     private HashMap<List<Double>, Double> dividedDifferences;
     private Polynomial prodOfDiffs = new Polynomial(1.0);
@@ -89,8 +89,8 @@ public class InterpolatingPolynomial extends Polynomial implements Function {
         }
     }
 
-    @Override
+    /*@Override
     public Double invoke(double x) {
         return super.invoke(x);
-    }
+    }*/
 }
