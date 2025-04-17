@@ -13,6 +13,10 @@ public class PointsPainter implements Painter{
     private int width;
     private int height;
 
+    public PointsPainter(Converter converter) {
+        this.converter = converter;
+    }
+
     public void setConverter(Converter converter) {
         this.converter = converter;
     }

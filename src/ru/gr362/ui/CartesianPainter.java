@@ -4,9 +4,15 @@ import ru.gr362.converting.Converter;
 import java.awt.*;
 
 public class CartesianPainter implements Painter {
+    private Converter converter;
     private int width;
     private int height;
-    private Converter converter;
+
+    public CartesianPainter(Converter converter) {
+        this.converter = converter;
+        width = converter.getWidth();
+        height = converter.getHeight();
+    }
 
     public void paint(Graphics g) {
         Graphics2D g2 = (Graphics2D)g;
@@ -45,23 +51,6 @@ public class CartesianPainter implements Painter {
                 g.drawString(label, yAxis + 8, y + labelHeight / 2 - 4);
             }
         }
-
-        /*
-        // Пример отрисовки текста
-        var sz = 6;
-        g.drawLine(300, height / 2 - sz, 300, height / 2 + sz);
-        var pos = -1.0;
-        var strPos = "" + pos;
-        g.setColor(Color.RED);
-        var f = new Font("Cambria", Font.BOLD, 12);
-        g.setFont(f);
-        var m = g.getFontMetrics();
-        var strRect = m.getStringBounds(strPos, g);
-        g.drawString(
-                strPos,
-                (int)(300 - strRect.getWidth() / 2),
-                (int)(height / 2 + sz + strRect.getHeight())
-        );*/
     }
 
     @Override
