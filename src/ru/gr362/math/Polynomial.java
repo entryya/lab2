@@ -1,13 +1,14 @@
 package ru.gr362.math;
 
 import org.jetbrains.annotations.NotNull;
+import ru.gr362.ui.Function;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-public class Polynomial {
+public class Polynomial implements Function {
     protected SortedMap<Integer, Double> coef;
 
     public Polynomial() {
@@ -126,5 +127,16 @@ public class Polynomial {
         for (var pow: coef.keySet())
             result += Math.pow(x, pow) * coef.get(pow);
         return result;
+    }
+
+    public Polynomial differentiate() {
+        var result = new TreeMap<Integer, Double>();
+        for (var degree : coef.keySet()) {
+            double coeff = coef.get(degree);
+
+            result.put(degree - 1, coeff * degree);
+
+        }
+        return new Polynomial(result);
     }
 }
