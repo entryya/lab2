@@ -1,6 +1,5 @@
 package ru.gr362.ui;
 
-import ru.gr362.math.Derivative;
 import ru.gr362.math.InterpolatingPolynomial;
 import ru.gr362.converting.Converter;
 
@@ -8,21 +7,23 @@ import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class MainWindow extends JFrame {
     private static final int MIN_SZ = GroupLayout.PREFERRED_SIZE;
     private static final int MAX_SZ = GroupLayout.DEFAULT_SIZE;
 
-    private Converter converter;
-    private final CartesianPainter cp = new CartesianPainter();
-    private final PointsPainter pointsPainter = new PointsPainter();
-    private FunctionPainter functionPainter = new FunctionPainter();
+    private final Converter converter = new Converter(-5.0, 5.0, -5.0, 5.0, 800, 600);
+
+    private final CartesianPainter cp = new CartesianPainter(converter);
+    private final PointsPainter pointsPainter = new PointsPainter(converter);
+
+    private final FunctionPainter polynomialPainter = new FunctionPainter(converter);
+    private final FunctionPainter derivativePainter = new FunctionPainter(converter);
 
     private InterpolatingPolynomial interpolatingPolynomial;
-    private Derivative derivative;
 
     private JPanel mainPanel;
     private JPanel controlPanel;
@@ -164,50 +165,49 @@ public class MainWindow extends JFrame {
         );
     }
 
+
     private void initComponents(){
         mainPanel = new JPanel(){
             @Override
             public void paint(Graphics g) {
                 super.paint(g);
-
-                double xMin = (double) spXMin.getValue();
-                double xMax = (double) spXMax.getValue();
-                double yMin = (double) spYMin.getValue();
-                double yMax = (double) spYMax.getValue();
-
-                int w = mainPanel.getWidth();
-                int h = mainPanel.getHeight();
-
-                converter = new Converter(xMin, xMax, yMin, yMax, w, h);
-
-                cp.setWidth(w);
-                cp.setHeight(h);
-                cp.setConverter(converter);
                 cp.paint(g);
 
                 if (cbPoints.isSelected()) {
-                    pointsPainter.setConverter(converter);
-                    pointsPainter.setColor(pPoints.getBackground());
                     pointsPainter.paint(g);
                 }
-
                 if (cbPolynomial.isSelected()) {
-                    functionPainter.setConverter(converter);
-                    functionPainter.setFunction(interpolatingPolynomial);
-                    functionPainter.setColor(pPolynomial.getBackground());
-                    functionPainter.paint(g);
+                    polynomialPainter.paint(g);
                 }
-
                 if (cbDerivative.isSelected()) {
-                    derivative = new Derivative(interpolatingPolynomial);
-                    functionPainter.setConverter(converter);
-                    functionPainter.setFunction(derivative);
-                    functionPainter.setColor(pDerivative.getBackground());
-                    functionPainter.paint(g);
+                    derivativePainter.paint(g);
                 }
             }
         };
         mainPanel.setBackground(Color.WHITE);
+
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+
+                int w = mainPanel.getWidth();
+                int h = mainPanel.getHeight();
+
+                converter.setWidth(w);
+                converter.setHeight(h);
+
+                cp.setWidth(w);
+                cp.setHeight(h);
+
+                polynomialPainter.setWidth(w);
+                polynomialPainter.setHeight(h);
+
+                derivativePainter.setWidth(w);
+                derivativePainter.setHeight(h);
+
+                mainPanel.repaint();
+            }
+        });
 
         mainPanel.addMouseListener(new MouseAdapter() {
             @Override
@@ -221,12 +221,22 @@ public class MainWindow extends JFrame {
                     pointsPainter.addPoint(x, y);
                     if (interpolatingPolynomial == null) {
                         interpolatingPolynomial = new InterpolatingPolynomial(Map.of(x, y));
-                    } else interpolatingPolynomial.addPoint(x, y);
+                    } else {
+                        interpolatingPolynomial.addPoint(x, y);
+                    }
                 } else if (SwingUtilities.isRightMouseButton(e)) {
                     if (!pointsPainter.getPoints().isEmpty()) {
                         pointsPainter.deletePoint(x, y);
                         interpolatingPolynomial.deletePoint(x, y);
+                        // чтобы, если до удаления в целом только одна точка и была, не рисовался полином y = 0
+                        if (pointsPainter.getPoints().isEmpty()) {
+                            interpolatingPolynomial = null;
+                        }
                     }
+                }
+                polynomialPainter.setFunction(interpolatingPolynomial);
+                if (interpolatingPolynomial != null) {
+                    derivativePainter.setFunction(interpolatingPolynomial.differentiate());
                 }
                 mainPanel.repaint();
             }
@@ -257,18 +267,22 @@ public class MainWindow extends JFrame {
 
         nmXMin.addChangeListener(e -> {
             nmXMax.setMinimum((double)nmXMin.getValue() + 0.1);
+            converter.setxMin((Double) nmXMin.getValue());
             mainPanel.repaint();
         });
         nmXMax.addChangeListener(e -> {
             nmXMin.setMaximum((double)nmXMax.getValue() - 0.1);
+            converter.setxMax((Double) nmXMax.getValue());
             mainPanel.repaint();
         });
         nmYMin.addChangeListener(e -> {
             nmYMax.setMinimum((double)nmYMin.getValue() + 0.1);
+            converter.setyMin((Double) nmYMin.getValue());
             mainPanel.repaint();
         });
         nmYMax.addChangeListener(e -> {
             nmYMin.setMaximum((double)nmYMax.getValue() - 0.1);
+            converter.setyMax((Double) nmYMax.getValue());
             mainPanel.repaint();
         });
 
@@ -287,23 +301,7 @@ public class MainWindow extends JFrame {
         cbPolynomial = new JCheckBox("Показывать полином", true);
         cbDerivative = new JCheckBox("Показывать производную", false);
 
-        cbPoints.addMouseListener(repaintOnClick);
-        cbPolynomial.addMouseListener(repaintOnClick);
-        cbDerivative.addMouseListener(repaintOnClick);
-
-        pPoints = new JPanel();
-        pPoints.setBackground(Color.decode("#FF7F50"));
-        pPolynomial = new JPanel();
-        pPolynomial.setBackground(Color.decode("#1E90FF"));
-        pDerivative = new JPanel();
-        pDerivative.setBackground(Color.decode("#90EE90"));
-
-
-        addColorChooser(pPoints, "Цвет точек");
-        addColorChooser(pPolynomial, "Цвет графика полинома");
-        addColorChooser(pDerivative, "Цвет графика производной");
-
-        /*cbPoints.addMouseListener(new MouseAdapter() {
+        cbPoints.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 mainPanel.repaint();
@@ -315,61 +313,44 @@ public class MainWindow extends JFrame {
             public void mouseClicked(MouseEvent e) {
                 mainPanel.repaint();
             }
-        });*/
+        });
+
+        cbDerivative.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                mainPanel.repaint();
+            }
+        });
+
+        pPoints = new JPanel();
+        pPoints.setBackground(Color.decode("#FF7F50"));
+
+        pPolynomial = new JPanel();
+        pPolynomial.setBackground(Color.decode("#1E90FF"));
+
+        pDerivative = new JPanel();
+        pDerivative.setBackground(Color.decode("#90EE90"));
+
+        pointsPainter.setColor(pPoints.getBackground());
+        polynomialPainter.setColor(pPolynomial.getBackground());
+        derivativePainter.setColor(pDerivative.getBackground());
+
+        setupColorChooser(pPoints, "Цвет точек", pointsPainter::setColor);
+        setupColorChooser(pPolynomial, "Цвет графика полинома", polynomialPainter::setColor);
+        setupColorChooser(pDerivative, "Цвет графика производной", derivativePainter::setColor);
     }
 
-    private MouseAdapter repaintOnClick = new MouseAdapter() {
-        @Override
-        public void mouseClicked(MouseEvent e) {
-            mainPanel.repaint();
-        }
-    };
-
-    private void addColorChooser(JPanel panel, String title) {
+    private void setupColorChooser(JPanel panel, String title, Consumer<Color> colorConsumer) {
         panel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 Color newColor = JColorChooser.showDialog(MainWindow.this, title, panel.getBackground());
                 if (newColor != null) {
                     panel.setBackground(newColor);
+                    colorConsumer.accept(newColor);
                     mainPanel.repaint();
                 }
             }
         });
     }
 }
-
-
-
-/*pPoints.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                Color newColor = JColorChooser.showDialog(MainWindow.this, "Цвет точек", pPoints.getBackground());
-                if (newColor != null) {
-                    pPoints.setBackground(newColor);
-                    mainPanel.repaint();
-                }
-            }
-        });
-
-        pPolynomial.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                Color newColor = JColorChooser.showDialog(MainWindow.this, "Цвет графика полинома", pPolynomial.getBackground());
-                if (newColor != null) {
-                    pPolynomial.setBackground(newColor);
-                    mainPanel.repaint();
-                }
-            }
-        });
-
-        pDerivative.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                Color newColor = JColorChooser.showDialog(MainWindow.this, "Цвет графика производной", pDerivative.getBackground());
-                if (newColor != null) {
-                    pDerivative.setBackground(newColor);
-                    mainPanel.repaint();
-                }
-            }
-        });*/
