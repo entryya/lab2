@@ -11,7 +11,11 @@ public class FunctionPainter implements Painter {
     private int width;
     private int height;
 
-    private final double STEP = 0.01;
+    public FunctionPainter(Converter converter) {
+        this.converter = converter;
+        width = converter.getWidth();
+        height = converter.getHeight();
+    }
 
     public void setFunction(Function function) {
         this.function = function;
@@ -30,28 +34,22 @@ public class FunctionPainter implements Painter {
         if (function == null || converter == null) {
             return;
         }
-
         g.setColor(color);
 
-        double xMin = converter.getxMin();
-        double xMax = converter.getxMax();
+        int prevX = -1;
+        int prevY = -1;
 
-        Double prevX = null, prevY = null;
-
-        for (double x = xMin; x <= xMax; x += STEP) {
+        for (int xScr = 0; xScr < width; xScr++) {
+            double x = converter.xScr2Crt(xScr);
             double y = function.invoke(x);
+            int yScr = converter.yCrt2Scr(y);
 
-            int xs = converter.xCrt2Scr(x);
-            int ys = converter.yCrt2Scr(y);
-
-            if (prevX != null && prevY != null) {
-                int prevXs = converter.xCrt2Scr(prevX);
-                int prevYs = converter.yCrt2Scr(prevY);
-                g.drawLine(prevXs, prevYs, xs, ys);
+            if (xScr > 0) {
+                g.drawLine(prevX, prevY, xScr, yScr);
             }
 
-            prevX = x;
-            prevY = y;
+            prevX = xScr;
+            prevY = yScr;
         }
     }
 
