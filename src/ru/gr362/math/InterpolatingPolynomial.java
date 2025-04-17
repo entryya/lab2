@@ -88,9 +88,4 @@ public class InterpolatingPolynomial extends Polynomial implements Function{
             create();
         }
     }
-
-    /*@Override
-    public Double invoke(double x) {
-        return super.invoke(x);
-    }*/
 }
