@@ -9,6 +9,8 @@ public class Converter {
     private int width;
     private int height;
 
+    public Converter() {}
+
     public Converter(double xMin, double xMax, double yMin, double yMax) {
         this.xMin = xMin;
         this.xMax = xMax;
